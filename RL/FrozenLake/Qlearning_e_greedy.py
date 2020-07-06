@@ -20,7 +20,7 @@ env = gym.make('FrozenLake-v3')
 
 #Initialize table with all zeors
 Q = np.zeros([env.observation_space.n, env.action_space.n])
-
+dis = .99
 #print(env.observation_space.n, env.action_space.n)
 
 #Set learning parameters
@@ -34,14 +34,20 @@ for i in range(num_episodes):
     rAll = 0
     done = False
 
+    e = 1./((i//100)+1)
+
     #The Q-Table learning algorithm
     while not done:
-        action = rargmax(Q[state,:])
+        if np.random.rand(1) <e:
+            action = env.action_space.sample()
+        else:
+            action = np.argmax(Q[state,:])
+        
         #Get new state and reward from environment
         new_state, reward, done, _ = env.step(action)
 
-        #Update Q-Table with new knowledge using learning rate
-        Q[state,action] = reward + np.max(Q[new_state,:])
+        #Update Q-Table with new knowledge using decay rate
+        Q[state,action] = reward + dis * np.max(Q[new_state,:])
         
         rAll += reward
         state = new_state
